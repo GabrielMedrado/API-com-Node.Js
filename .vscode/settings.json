@@ -1,3 +1,18 @@
 {
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "cSpell.words": [
+        "cadastrar",
+        "carro",
+        "Deve",
+        "disponibilidade",
+        "dtos",
+        "existente",
+        "middlewares",
+        "openapi",
+        "placa",
+        "possível",
+        "tsyringe",
+        "typeorm",
+        "uuidv"
+    ]
 }
