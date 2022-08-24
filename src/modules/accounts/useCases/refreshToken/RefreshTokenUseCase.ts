@@ -1,9 +1,10 @@
-import auth from '@config/auth';
-import { IUsersTokensRepository } from '@modules/accounts/repositories/IUsersTokensRepository';
-import { IDateProvider } from '@shared/container/providers/DateProvider/IDateProvider';
-import { AppError } from '@shared/errors/AppError';
-import { sign, verify } from 'jsonwebtoken';
 import { inject, injectable } from 'tsyringe';
+import { verify, sign } from 'jsonwebtoken';
+
+import { IUsersTokensRepository } from '@modules/accounts/repositories/IUsersTokensRepository';
+import auth from '@config/auth';
+import { AppError } from '@shared/errors/AppError';
+import { IDateProvider } from '@shared/container/providers/DateProvider/IDateProvider';
 
 interface IPayload {
     sub: string;
@@ -18,11 +19,12 @@ interface ITokenResponse {
 @injectable()
 class RefreshTokenUseCase {
     constructor(
-        @inject('UsersTokenRepository')
+        @inject('UsersTokensRepository')
         private usersTokensRepository: IUsersTokensRepository,
         @inject('DayjsDateProvider')
         private dateProvider: IDateProvider,
     ) {}
+
     async execute(token: string): Promise<ITokenResponse> {
         const { email, sub } = verify(
             token,
@@ -38,18 +40,20 @@ class RefreshTokenUseCase {
             );
 
         if (!userToken) {
-            throw new AppError('Refresh Token does not existsS!');
+            throw new AppError('Refresh Token does not exists!');
         }
+
         await this.usersTokensRepository.deleteById(userToken.id);
+
+        const refresh_token = sign({ email }, auth.secret_refresh_token, {
+            subject: sub,
+            expiresIn: auth.expires_in_refresh_token,
+        });
 
         const expires_date = this.dateProvider.addDays(
             auth.expires_refresh_token_days,
         );
 
-        const refresh_token = sign({ email }, auth.secret_refresh_token, {
-            subject: sub,
-            expiresIn: auth.expires_in_token,
-        });
         await this.usersTokensRepository.create({
             expires_date,
             refresh_token,
@@ -58,7 +62,7 @@ class RefreshTokenUseCase {
 
         const newToken = sign({}, auth.secret_token, {
             subject: user_id,
-            expiresIn: auth.expires_in_refresh_token,
+            expiresIn: auth.expires_in_token,
         });
 
         return {

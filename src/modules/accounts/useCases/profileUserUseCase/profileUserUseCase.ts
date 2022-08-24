@@ -1,6 +1,5 @@
 import { inject, injectable } from 'tsyringe';
 
-import { User } from '@modules/accounts/infra/typeorm/entities/User';
 import { IUsersRepository } from '@modules/accounts/repositories/IUsersRepository';
 import { IUserResponseDTO } from '@modules/accounts/dtos/IUserResponseDTO';
 import { UserMap } from '@modules/accounts/mapper/UserMap';
