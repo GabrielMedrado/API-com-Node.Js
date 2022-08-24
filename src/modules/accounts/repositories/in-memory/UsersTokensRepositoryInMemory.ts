@@ -30,7 +30,6 @@ class UsersTokensRepositoryInMemory implements IUsersTokensRepository {
         const userToken = this.usersTokens.find(
             ut => ut.user_id === user_id && ut.refresh_token && refresh_token,
         );
-
         return userToken;
     }
 

@@ -1,12 +1,12 @@
-import { inject, injectable } from 'tsyringe';
-import { IUsersRepository } from '@modules/accounts/repositories/IUsersRepository';
-
-import { compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
+import { inject, injectable } from 'tsyringe';
+
+import { IUsersRepository } from '@modules/accounts/repositories/IUsersRepository';
 import { AppError } from '@shared/errors/AppError';
 import { IUsersTokensRepository } from '@modules/accounts/repositories/IUsersTokensRepository';
 import auth from '@config/auth';
 import { IDateProvider } from '@shared/container/providers/DateProvider/IDateProvider';
+import { compare } from 'bcryptjs';
 
 interface IRequest {
     email: string;
@@ -27,10 +27,10 @@ class AuthenticateUserUseCase {
     constructor(
         @inject('UsersRepository')
         private usersRepository: IUsersRepository,
-        @inject('UsersTokenRepository')
+        @inject('UsersTokensRepository')
         private usersTokensRepository: IUsersTokensRepository,
         @inject('DayjsDateProvider')
-        private dateprovider: IDateProvider,
+        private dateProvider: IDateProvider,
     ) {}
 
     async execute({ email, password }: IRequest): Promise<IResponse> {
@@ -55,15 +55,15 @@ class AuthenticateUserUseCase {
 
         const token = sign({}, secret_token, {
             subject: user.id,
-            expiresIn: expires_in_refresh_token,
+            expiresIn: expires_in_token,
         });
 
         const refresh_token = sign({ email }, secret_refresh_token, {
             subject: user.id,
-            expiresIn: expires_in_token,
+            expiresIn: expires_in_refresh_token,
         });
 
-        const refresh_token_expires_date = this.dateprovider.addDays(
+        const refresh_token_expires_date = this.dateProvider.addDays(
             expires_refresh_token_days,
         );
 
